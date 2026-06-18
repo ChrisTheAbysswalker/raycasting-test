@@ -10,10 +10,8 @@ class Raycasting {
 
         this.wallHitX = 0;
         this.wallHitY = 0;
-
         this.wallHitXHorizontal = 0;
         this.wallHitXVertical = 0;
-
         this.wallHitYHorizontal = 0;
         this.wallHitYVertical = 0;
     }
@@ -24,9 +22,7 @@ class Raycasting {
 
     normalizeAngle(angle) {
         angle = angle % (2 * Math.PI);
-        if (angle < 0) {
-            angle += 2 * Math.PI;
-        }
+        if (angle < 0) angle += 2 * Math.PI;
         return angle;
     }
 
@@ -35,32 +31,12 @@ class Raycasting {
     }
 
     castRay() {
-        this.xIntercept = 0;
-        this.yIntercept = 0;
+        const tileSize = 50;
 
-        this.xStep = 0;
-        this.yStep = 0;
+        this.isLookingDown = this.playerAngle < Math.PI;
+        this.isLookingLeft = this.playerAngle > Math.PI / 2 && this.playerAngle < 3 * Math.PI / 2;
 
-        this.isLookingDown = false;
-        this.isLookingLeft = false;
-
-        if (this.playerAngle < Math.PI) {
-            this.isLookingDown = true;
-        }
-
-        if (this.playerAngle > Math.PI / 2 && this.playerAngle < 3 * Math.PI / 2) {
-            this.isLookingLeft = true;
-        }
-
-        var tileSize = 50;
-        var horizontalCollition = false;
-        this.yIntercept = Math.floor(this.y / tileSize) * tileSize;
-
-        if (this.isLookingDown) {
-            this.yIntercept += tileSize;
-        }
-
-        var tanAngle = Math.tan(this.playerAngle);
+        const tanAngle = Math.tan(this.playerAngle);
 
         if (Math.abs(tanAngle) < 0.000001) {
             this.wallHitX = this.x;
@@ -68,114 +44,95 @@ class Raycasting {
             return;
         }
 
-        var adyacent = (this.yIntercept - this.y) / tanAngle;
-        this.xIntercept = this.x + adyacent;
+        let horizontalCollition = false;
 
-        this.yStep = this.isLookingDown ? tileSize : -tileSize;
-        this.xStep = this.yStep / tanAngle;
+        let yH = Math.floor(this.y / tileSize) * tileSize;
+        if (this.isLookingDown) yH += tileSize;
 
-        if ((this.isLookingLeft && this.xStep > 0) || (!this.isLookingLeft && this.xStep < 0)) {
-            this.xStep = -this.xStep;
-        }
+        let xH = this.x + (yH - this.y) / tanAngle;
 
-        var nextXHorizontal = this.xIntercept;
-        var nextYHorizontal = this.yIntercept;
+        const yStepH = this.isLookingDown ? tileSize : -tileSize;
+        const xStepH = yStepH / tanAngle;
 
-        if (!this.isLookingDown) {
-            nextYHorizontal -= 1;
-        }
+        let nextXH = xH;
+        let nextYH = this.isLookingDown ? yH : yH - 1;
 
         while (!horizontalCollition) {
-            var tileX = Math.floor(nextXHorizontal / tileSize);
-            var tileY = Math.floor(nextYHorizontal / tileSize);
+            const tileX = Math.floor(nextXH / tileSize);
+            const tileY = Math.floor(nextYH / tileSize);
 
-            if (tileX < 0 || tileX >= this.level.mapWidth || tileY < 0 || tileY >= this.level.mapHeight) {
+            if (tileX < 0 || tileX >= this.level.mapWidth ||
+                tileY < 0 || tileY >= this.level.mapHeight) {
+                this.wallHitXHorizontal = nextXH;
+                this.wallHitYHorizontal = nextYH;
                 horizontalCollition = true;
-                this.wallHitX = nextXHorizontal;
-                this.wallHitY = nextYHorizontal;
                 break;
             }
 
             if (this.level.collition(tileX, tileY)) {
+                this.wallHitXHorizontal = nextXH;
+                this.wallHitYHorizontal = nextYH;
                 horizontalCollition = true;
-                this.wallHitXHorizontal = nextXHorizontal;
-                this.wallHitYHorizontal = nextYHorizontal;
-                this.wallHitX = nextXHorizontal;
-                this.wallHitY = nextYHorizontal;
             } else {
-                nextXHorizontal += this.xStep;
-                nextYHorizontal += this.yStep;
+                nextXH += xStepH;
+                nextYH += yStepH;
             }
-
-
         }
 
-        var verticalCollition = false;
-        this.xIntercept = Math.floor(this.x / tileSize) * tileSize;
+        let verticalCollition = false;
 
-        if (this.isLookingLeft) {
-            this.xIntercept += tileSize;
-        }
+        let xV = Math.floor(this.x / tileSize) * tileSize;
+        if (!this.isLookingLeft) xV += tileSize;
 
-        var mirror = (this.xIntercept - this.x) * tanAngle;
-        this.yIntercept = this.y + mirror;
+        let yV = this.y + (xV - this.x) * tanAngle;
 
-        this.xStep = tileSize;
-        if (this.isLookingLeft) {
-            this.xStep = -this.xStep;
-        }
+        const xStepV = this.isLookingLeft ? -tileSize : tileSize;
+        const yStepV = tileSize * tanAngle * (this.isLookingLeft ? -1 : 1);
 
-        this.yStep = tileSize / tanAngle;
+        let nextXV = this.isLookingLeft ? xV - 1 : xV;
+        let nextYV = yV;
 
-        if ((this.isLookingDown && this.yStep > 0) || (this.isLookingDown && this.yStep < 0)) {
-            this.yStep = -this.yStep;
-        }
+        while (!verticalCollition) {
+            const tileX = Math.floor(nextXV / tileSize);
+            const tileY = Math.floor(nextYV / tileSize);
 
-        var nextXVertical = this.xIntercept;
-        var nextYVertical = this.yIntercept;
-
-        if (this.isLookingLeft) {
-            nextXVertical--;
-        }
-
-        while (!verticalCollition && (nextXVertical >= 0 && nextYVertical >= 0 && nextXVertical < this.level.mapWidth && nextYVertical < this.level.mapHeight)) {
-            var tileX = Math.floor(nextXVertical / tileSize);
-            var tileY = Math.floor(nextYVertical / tileSize);
+            if (tileX < 0 || tileX >= this.level.mapWidth ||
+                tileY < 0 || tileY >= this.level.mapHeight) {
+                this.wallHitXVertical = nextXV;
+                this.wallHitYVertical = nextYV;
+                verticalCollition = true;
+                break;
+            }
 
             if (this.level.collition(tileX, tileY)) {
+                this.wallHitXVertical = nextXV;
+                this.wallHitYVertical = nextYV;
                 verticalCollition = true;
-                this.wallHitXVertical = nextXVertical;
-                this.wallHitYVertical = nextYVertical;
             } else {
-                nextXVertical += this.xStep;
-                nextYVertical += this.yStep;
+                nextXV += xStepV;
+                nextYV += yStepV;
             }
         }
 
-        var horizontalDistamce = 9999;
-        var verticalDistamce = 9999;
+        const distH = horizontalCollition
+            ? this.getDistance(this.x, this.y, this.wallHitXHorizontal, this.wallHitYHorizontal)
+            : Infinity;
 
-        if (horizontalCollition) {
-            horizontalDistamce = this.getDistance(this.x, this.y, this.wallHitXHorizontal, this.wallHitYHorizontal);
-        }
-        if (verticalCollition) {
-            verticalDistamce = this.getDistance(this.x, this.y, this.wallHitXVertical, this.wallHitYVertical);
-        }
-        console.log(horizontalDistamce, verticalDistamce);
+        const distV = verticalCollition
+            ? this.getDistance(this.x, this.y, this.wallHitXVertical, this.wallHitYVertical)
+            : Infinity;
 
-        if (horizontalDistamce < verticalDistamce) {
+        if (distH < distV) {
             this.wallHitX = this.wallHitXHorizontal;
             this.wallHitY = this.wallHitYHorizontal;
         } else {
             this.wallHitX = this.wallHitXVertical;
             this.wallHitY = this.wallHitYVertical;
         }
-
     }
 
     render() {
         this.castRay();
-
         this.ctx.beginPath();
         this.ctx.moveTo(this.x, this.y);
         this.ctx.lineTo(this.wallHitX, this.wallHitY);

@@ -15,7 +15,7 @@ class Player {
 
         this.moveSpeed = 2;
 
-        this.ray = new Ray(this.ctx, this.level, this.x, this.y, this.rotationAngle, this.rotationSpeed, 0);
+        this.ray = new Ray(this.ctx, this.level, this.x, this.y, this.rotationAngle, 0, 0);
     }
 
     getMovementDirection(direction) {
@@ -66,7 +66,7 @@ class Player {
         this.rotationAngle += this.isSpining * this.rotationSpeed;
         this.rotationAngle = this.normalizeAngle(this.rotationAngle);
 
-        this.ray.setAngle(this.rotationAngle);
+        this.ray.playerAngle = this.rotationAngle;
     }
 
     normalizeAngle(angle) {
@@ -80,16 +80,14 @@ class Player {
     render() {
         this.playerMovement();
 
-        this.ray.setAngle(this.rotationAngle);
         this.ray.x = this.x;
         this.ray.y = this.y;
-        this.ray.angle = this.rotationAngle;
         this.ray.render();
         
         this.ctx.fillStyle = "#ff0000";
         this.ctx.fillRect(this.x - 3, this.y - 3, 6, 6);
 
-        var rayX = this.x + Math.cos(this.rotationAngle) * 40;
+        var rayX = this.x + Math.cos(this.rotationAngle) * 50;
         var rayY = this.y + Math.sin(this.rotationAngle) * 50;
 
         this.ctx.beginPath();
