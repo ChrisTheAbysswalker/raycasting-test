@@ -39,7 +39,9 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function gameLoop() {
-        level.render();
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        //level.render();
         player.render();
     }
 

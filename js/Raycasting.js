@@ -4,9 +4,12 @@ class Raycasting {
         this.level = level;
         this.x = x;
         this.y = y;
+
         this.playerAngle = playerAngle;
         this.angleIncrement = angleIncrement;
+
         this.column = column;
+        this.angleOffset = 0;
 
         this.wallHitX = 0;
         this.wallHitY = 0;
@@ -14,6 +17,7 @@ class Raycasting {
         this.wallHitXVertical = 0;
         this.wallHitYHorizontal = 0;
         this.wallHitYVertical = 0;
+        this.distance
     }
 
     setAngle(angle) {
@@ -125,10 +129,34 @@ class Raycasting {
         if (distH < distV) {
             this.wallHitX = this.wallHitXHorizontal;
             this.wallHitY = this.wallHitYHorizontal;
+            this.distance = distH;
+            
         } else {
             this.wallHitX = this.wallHitXVertical;
             this.wallHitY = this.wallHitYVertical;
+            this.distance = distV;
         }
+
+        //this.distance = this.distance * Math.cos(this.playerAngle);
+
+    }
+
+    wallRender() {
+        this.castRay();
+        var columnHeight = this.ctx.canvas.height;
+        var proyectionDistance = (this.ctx.canvas.width / 2) / Math.tan(30);
+        var wallH = (columnHeight / this.distance) * proyectionDistance;
+
+        var y0 = parseInt(this.ctx.canvas.height / 2) - parseInt(wallH / 2);
+        var y1 = y0 + parseInt(wallH);
+
+        var x = this.column;
+
+        this.ctx.beginPath();
+        this.ctx.moveTo(x, y0);
+        this.ctx.lineTo(x, y1);
+        this.ctx.strokeStyle = "#aeaeae";
+        this.ctx.stroke();
     }
 
     render() {

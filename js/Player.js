@@ -15,7 +15,23 @@ class Player {
 
         this.moveSpeed = 2;
 
-        this.ray = new Ray(this.ctx, this.level, this.x, this.y, this.rotationAngle, 0, 0);
+        this.maxRays = ctx.canvas.width;
+        this.rays = [];
+        
+        this.FOV = 60;
+        this.angleIncrement = this.angleToRadians(this.FOV) / this.maxRays; 
+        this.startAngle = this.angleToRadians(this.rotationAngle - 30);
+        this.rayAngle = this.startAngle;
+
+        for (var i = 0; i < this.maxRays; i++) {
+            const offset = this.angleToRadians(-this.FOV / 2) + (this.angleIncrement * i);
+            this.rays[i] = new Ray(this.ctx, this.level, this.x, this.y, this.rotationAngle, this.rayAngle, i);
+            this.rays[i].angleOffset = offset;
+        }
+    }
+
+    angleToRadians(angle) {
+        return angle * (Math.PI / 180);
     }
 
     getMovementDirection(direction) {
@@ -66,7 +82,12 @@ class Player {
         this.rotationAngle += this.isSpining * this.rotationSpeed;
         this.rotationAngle = this.normalizeAngle(this.rotationAngle);
 
-        this.ray.playerAngle = this.rotationAngle;
+        for (let i = 0; i < this.maxRays; i++) {
+            this.rays[i].x = this.x;
+            this.rays[i].y = this.y;
+            //this.rays[i].playerAngle = this.rotationAngle; //Un solo rayo
+            this.rays[i].playerAngle = this.normalizeAngle(this.rotationAngle + this.rays[i].angleOffset);
+        }
     }
 
     normalizeAngle(angle) {
@@ -80,21 +101,14 @@ class Player {
     render() {
         this.playerMovement();
 
-        this.ray.x = this.x;
-        this.ray.y = this.y;
-        this.ray.render();
+        for (let i = 0; i < this.maxRays; i++) {
+            //this.rays[i].render();
+            this.rays[i].wallRender();
+        }
         
-        this.ctx.fillStyle = "#ff0000";
-        this.ctx.fillRect(this.x - 3, this.y - 3, 6, 6);
+        //this.ctx.fillStyle = "#ff0000";
+        //this.ctx.fillRect(this.x - 3, this.y - 3, 6, 6);
 
-        var rayX = this.x + Math.cos(this.rotationAngle) * 50;
-        var rayY = this.y + Math.sin(this.rotationAngle) * 50;
-
-        this.ctx.beginPath();
-        this.ctx.moveTo(this.x, this.y);
-        this.ctx.lineTo(rayX, rayY);
-        this.ctx.strokeStyle = "#fffb00";
-        this.ctx.stroke();
     }
 }
 
