@@ -1,14 +1,41 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Raycasting</title>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="stylesheet" href="/style.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="stylesheet" href="/style.css" />
 </head>
-<body >
-    <canvas id="canvas" style="border: 1px solid black;"></canvas>
+<body>
+    <header class="title-block">
+        <p class="eyebrow">Motor 2.5D — JavaScript</p>
+        <h1>RAYCASTER</h1>
+    </header>
+
+    <div class="screen">
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <div class="controls">
+        <button type="button" id="btn">2D View</button>
+
+        <div class="legend">
+            <span class="legend-label">Move</span>
+            <div class="keypad" aria-hidden="true">
+                <span class="key key--up">↑</span>
+                <span class="key key--left">←</span>
+                <span class="key key--down">↓</span>
+                <span class="key key--right">→</span>
+            </div>
+        </div>
+    </div>
+
+    <p class="hint">
+        Use the arrow keys: ↑ ↓ to move forward and backward, ← → to turn the
+        camera.
+    </p>
+
     <script src="js/app.js" type="module"></script>
 </body>
 </html>
